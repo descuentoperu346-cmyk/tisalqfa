@@ -60,7 +60,7 @@
 
     .card {
       position: relative;
-      background: var(--crema);
+      background: #ffffff;
       border-radius: 28px;
       padding: 28px;
       box-shadow:
@@ -187,20 +187,10 @@
       data: destino,
       margin: 0,
       qrOptions: { errorCorrectionLevel: "Q" },
-      dotsOptions: {
-        type: "rounded",
-        gradient: {
-          type: "linear",
-          rotation: Math.PI / 4,
-          colorStops: [
-            { offset: 0, color: "#b3121c" },
-            { offset: 1, color: "#5e0a10" }
-          ]
-        }
-      },
-      cornersSquareOptions: { type: "extra-rounded", color: "#8a6420" },
-      cornersDotOptions: { type: "dot", color: "#b3121c" },
-      backgroundOptions: { color: "#fbf6ec" }
+      dotsOptions: { type: "rounded", color: "#000000" },
+      cornersSquareOptions: { type: "extra-rounded", color: "#000000" },
+      cornersDotOptions: { type: "dot", color: "#000000" },
+      backgroundOptions: { color: "#ffffff" }
     });
 
     qr.append(document.getElementById("qr"));
