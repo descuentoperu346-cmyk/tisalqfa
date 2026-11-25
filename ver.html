@@ -4,16 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tarjeta de identidad familiar</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
+    html, body { min-height: 100%; }
     body {
+      min-height: 100vh;
       background: #0f0e0d;
       display: grid;
       place-items: center;
       padding: 12px;
     }
-    img {
+
+    /* PC y celular en horizontal: la imagen completa */
+    .completa {
+      display: block;
       max-width: 100%;
       max-height: calc(100vh - 24px);
       width: auto;
@@ -21,9 +26,42 @@
       border-radius: 12px;
       box-shadow: 0 20px 50px -15px rgba(0,0,0,.8);
     }
+
+    /* Celular en vertical: la misma imagen en 3 recortes, uno encima del otro */
+    .pila { display: none; }
+
+    .recorte {
+      width: 100%;
+      background-image: url("imagen.jpg");
+      background-repeat: no-repeat;
+      border-radius: 12px;
+      box-shadow: 0 14px 34px -14px rgba(0,0,0,.8);
+    }
+    /* Medidas sobre imagen.jpg (2400×1350):
+       tamaño = 2400/ancho · posX = x/(2400-ancho) · posY = y/(1350-alto) */
+    .titulo  { aspect-ratio: 1620 / 260; background-size: 148.148% auto; background-position: 73.077% 10.092%; }
+    .anverso { aspect-ratio: 740 / 600;  background-size: 324.324% auto; background-position: 40.482% 61.6%; }
+    .reverso { aspect-ratio: 740 / 600;  background-size: 324.324% auto; background-position: 87.349% 61.6%; }
+
+    @media (orientation: portrait) and (max-width: 900px) {
+      body { place-items: start center; padding: 14px 12px 24px; }
+      .completa { display: none; }
+      .pila {
+        display: grid;
+        gap: 12px;
+        width: 100%;
+        max-width: 560px;
+      }
+    }
   </style>
 </head>
 <body>
-  <img src="imagen.jpg" alt="Tarjeta de identidad familiar: anverso y reverso" />
+  <img class="completa" src="imagen.jpg" alt="Tarjeta de identidad familiar: anverso y reverso" />
+
+  <div class="pila" role="img" aria-label="Tarjeta de identidad familiar: anverso y reverso">
+    <div class="recorte titulo"></div>
+    <div class="recorte anverso"></div>
+    <div class="recorte reverso"></div>
+  </div>
 </body>
 </html>
