@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Escanea el código</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+  <style>
+    :root {
+      --rojo: #b3121c;
+      --rojo-osc: #6e0b12;
+      --oro: #c9a24a;
+      --crema: #fbf6ec;
+      --tinta: #1c1a17;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+      font-family: "Inter", system-ui, sans-serif;
+      color: var(--crema);
+      touch-action: manipulation;  /* sin zoom por doble toque en celular */
+      user-select: none;           /* sin selección de texto al hacer triple clic */
+      -webkit-user-select: none;
+      background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(201,162,74,.22), transparent 60%),
+        radial-gradient(900px 500px at 110% 110%, rgba(179,18,28,.28), transparent 60%),
+        linear-gradient(160deg, #1d1b17 0%, #121110 100%);
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--oro);
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 600;
+      font-size: clamp(30px, 7vw, 40px);
+      line-height: 1.1;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      position: relative;
+      background: var(--crema);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow:
+        0 0 0 1px rgba(201,162,74,.5),
+        0 0 0 8px rgba(201,162,74,.08),
+        0 30px 60px -20px rgba(0,0,0,.7);
+    }
+
+    /* franja bicolor arriba */
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 72px; height: 10px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--rojo) 0 33%, #fff 33% 66%, var(--rojo) 66%);
+      box-shadow: 0 2px 8px rgba(0,0,0,.35);
+    }
+
+    #qr {
+      aspect-ratio: 1;
+      width: 100%;
+    }
+    #qr canvas, #qr svg {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Celulares en horizontal o pantallas bajas: que el QR quepa sin hacer scroll */
+    @media (max-height: 640px) and (orientation: landscape) {
+      body { padding: 16px; }
+      .wrap { max-width: 760px; display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; text-align: left; }
+      .wrap > .card { grid-row: 1 / span 4; grid-column: 1; width: min(78vh, 320px); }
+      .wrap > :not(.card) { grid-column: 2; }
+      h1 { margin-bottom: 0; }
+      .hint, .actions, .aviso { margin-top: 12px; }
+      .actions { justify-content: flex-start; }
+    }
+
+    /* Celulares muy angostos */
+    @media (max-width: 360px) {
+      .card { padding: 18px; border-radius: 22px; }
+    }
+
+    .hint {
+      margin-top: 22px;
+      color: rgba(251,246,236,.7);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .actions {
+      margin-top: 22px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(201,162,74,.55);
+      background: transparent;
+      color: var(--crema);
+      font: 500 14px "Inter", sans-serif;
+      padding: 11px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s, border-color .2s;
+    }
+    .actions[hidden] { display: none; }
+    .btn:hover { background: rgba(201,162,74,.15); border-color: var(--oro); }
+    .btn.primary {
+      background: var(--oro);
+      border-color: var(--oro);
+      color: var(--tinta);
+      font-weight: 600;
+    }
+    .btn.primary:hover { background: #d8b360; }
+
+    .aviso {
+      display: none;
+      margin-top: 18px;
+      font-size: 13px;
+      color: #f0c674;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="eyebrow">Escanea</p>
+
+    <div class="card">
+      <div id="qr" aria-label="Código QR que abre la imagen"></div>
+    </div>
+
+    <p class="hint">Apunta la cámara de tu celular al código para ver la imagen.</p>
+
+    <div class="actions" id="acciones" hidden>
+      <button class="btn primary" id="descargar">Descargar QR</button>
+    </div>
+
+    <p class="aviso" id="aviso">
+      Estás abriendo el archivo localmente: el QR funcionará cuando la página esté publicada en Vercel.
+    </p>
+  </main>
+
+  <script>
+    // El QR apunta a ver.html en el mismo dominio donde se publique la página
+    // (por ejemplo https://tu-proyecto.vercel.app/ver.html), así no hay que cambiar nada al desplegar.
+    const esLocal = location.protocol === "file:";
+    const destino = esLocal
+      ? "https://ejemplo.vercel.app/ver.html"
+      : new URL("ver.html", location.href).href;
+
+    if (esLocal) document.getElementById("aviso").style.display = "block";
+
+    const qr = new QRCodeStyling({
+      width: 1000,
+      height: 1000,
+      type: "canvas",
+      data: destino,
+      margin: 0,
+      qrOptions: { errorCorrectionLevel: "Q" },
+      dotsOptions: {
+        type: "rounded",
+        gradient: {
+          type: "linear",
+          rotation: Math.PI / 4,
+          colorStops: [
+            { offset: 0, color: "#b3121c" },
+            { offset: 1, color: "#5e0a10" }
+          ]
+        }
+      },
+      cornersSquareOptions: { type: "extra-rounded", color: "#8a6420" },
+      cornersDotOptions: { type: "dot", color: "#b3121c" },
+      backgroundOptions: { color: "#fbf6ec" }
+    });
+
+    qr.append(document.getElementById("qr"));
+
+    document.getElementById("descargar").addEventListener("click", () => {
+      qr.download({ name: "qr-tarjeta", extension: "png" });
+    });
+
+    // Botón oculto: 3 clics/toques seguidos en cualquier parte lo muestran u ocultan
+    const acciones = document.getElementById("acciones");
+    let toques = 0, temporizador;
+    document.addEventListener("pointerup", (e) => {
+      if (e.target.closest("#acciones")) return;
+      toques++;
+      clearTimeout(temporizador);
+      temporizador = setTimeout(() => (toques = 0), 600);
+      if (toques === 3) {
+        toques = 0;
+        acciones.hidden = !acciones.hidden;
+      }
+    });
+  </script>
+</body>
+</html>
